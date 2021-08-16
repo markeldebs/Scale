@@ -1,53 +1,42 @@
-# include <Arduino.h>
-# include <Ticker.h>
+/**
+ * Project:     BasicOTA for VSCode-PlatformIO
+ * Doc:         https://github.com/JakubAndrysek/BasicOTA-ESP32-library/blob/master/README.md
+ * Proj URL:    https://github.com/JakubAndrysek/BasicOTA-ESP32-library  
+ * Author:      Kuba Andrýsek
+ * Created:     2020-5-5
+ * Website:     https://kubaandrysek.cz
+ * Inspiration: https://lastminuteengineers.com/esp32-ota-updates-arduino-ide/
+*/
 
-////////////////////////////////////////////
+#include <Arduino.h>
+#include <WiFi.h>
+#include "BasicOTA.hpp"
+#include <Ticker.h>
 
-# define touchpin 2
+#define SSID      "Smokey"
+#define PASSWORD  "Smokey138045"
 
-int tvalue = 0;
-int buttonVal = 0;
-int buttonLast = 0;
-int n = 0;
-
-
-
-
-int checkButton (){
-    //int event = 0;
-    buttonVal = analogRead(touchpin);
-    if (buttonVal < 3500){
-        //Serial.println("Released");
-        tvalue = 0;
-        n = 0;
-
-    }
-    else if (buttonVal >= 3500 && n == 0 ){
-          tvalue++;
-          if (tvalue >= 45 && tvalue <= 60){
-          Serial.println("Tap");
-          tvalue = 0;
-          n =1;
-        }
-    }
-    //delay (100);
-     return tvalue;
-}
-
-////////////////////////////////////////////
+BasicOTA OTA;
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println("Startup");
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(SSID, PASSWORD);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
+    ESP.restart();
+  }
 
-    Serial.begin(9600);
+  OTA.begin(); // Setup settings
 
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 }
-
-////////////////////////////////////////////
 
 void loop() {
-
-    checkButton();
-
-
+  OTA.handle();  
+  Serial.println("Got em");
 }
-
